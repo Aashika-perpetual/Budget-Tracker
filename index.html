@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Loading...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(200deg, #fff0f5, #fc9e95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      flex-direction: column;
+      font-family: 'Poppins', Arial, sans-serif;
+    }
+    img {
+      width: 150px;
+      height: auto;
+      animation: bounce 2s ease-in-out infinite; /* bounce animation */
+    }
+    p {
+      margin-top: 20px;
+      color: #ff5c8a;
+      font-weight: bold;
+      font-size: 25px;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 2px solid #ff5c8a;
+    }
+    /* Bounce keyframes */
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px); /* Move up by 20px */
+      }
+    }
+  </style>
+</head>
+<body>
+  <img src="piggy-bank-20103_512.gif" alt="Loading..." />
+  <p id="typingText"></p>
+
+  <script>
+    const text = "Loading your budget insights . . .";
+    const typingElement = document.getElementById("typingText");
+    let index = 0;
+
+    function typeLetter() {
+      if (index < text.length) {
+        typingElement.textContent += text.charAt(index);
+        index++;
+        setTimeout(typeLetter, 80);
+      } else {
+        typingElement.style.borderRight = "none";
+      }
+    }
+
+    typeLetter();
+
+    setTimeout(() => {
+      window.location.href = "main.html";
+    }, 5000);
+  </script>
+</body>
+</html>

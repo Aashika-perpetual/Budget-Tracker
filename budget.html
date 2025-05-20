@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Budget Visualizer | How Broke Are You?</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+  margin: 0;
+  padding: 0;   /* Remove padding on body to avoid spacing */
+  font-family: 'Poppins', Arial, sans-serif;
+  background: linear-gradient(200deg, #fff0f5, #fc9e95);
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+header {
+  position: relative;
+  background-color: #fff0f5;
+  width: 100vw;          /* full viewport width */
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0;      /* remove rounding */
+  box-shadow: 0 6px 12px rgba(255, 92, 138, 0.25);
+  margin: 0 0 30px 0;    /* margin only bottom */
+  user-select: none;
+}
+
+
+    header a {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      background: #ff5c8a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(255, 92, 138, 0.5);
+      transition: background-color 0.3s ease;
+    }
+    header a img {
+      width: 22px;
+      height: 22px;
+      filter: brightness(0) invert(1);
+      user-select: none;
+    }
+    header a:hover {
+      background-color: #ff8da3;
+    }
+
+   h1.typing-header {
+  font-size: 40px;
+  font-weight: 700; /* Can be 600 or 700, choose one */
+  line-height: 1.2;
+
+  background: linear-gradient(90deg, #ff5c8a, #ff9a76);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 3px solid #ff5c8a;
+
+  animation: typing 5s steps(40, end) infinite, blink 0.75s step-end infinite;
+}
+
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 34ch; }
+}
+
+    @keyframes blink {
+      from, to { border-color: transparent; }
+      50% { border-color: #ff5c8a; }
+    }
+
+    main {
+      width: 100%;
+      max-width: 700px;
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(255, 92, 138, 0.15);
+    }
+
+    /* Inputs and button container */
+    .input-group {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+    input[type="text"],
+    input[type="number"] {
+      flex: 1 1 150px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      border-radius: 12px;
+      border: 1.5px solid #ffb2c1;
+      transition: border-color 0.3s ease;
+      outline-offset: 2px;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      border-color: #ff5c8a;
+      outline: none;
+      box-shadow: 0 0 8px #ff5c8a66;
+    }
+
+    button {
+      background: #ff5c8a;
+      color: white;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 28px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 12px rgba(255, 92, 138, 0.4);
+      transition: background-color 0.3s ease, transform 0.15s ease;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    button:hover {
+      background: #ff2e63;
+      transform: scale(1.05);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+
+    /* Table styling */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 12px;
+      margin-bottom: 30px;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 12px 15px;
+      background: #ffb2c1;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.1rem;
+      border-radius: 12px 12px 0 0;
+      user-select: none;
+    }
+
+    tbody tr {
+      background: #fff0f5;
+      transition: background-color 0.3s ease;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(255, 92, 138, 0.12);
+      cursor: default;
+    }
+    tbody tr:hover {
+      background-color: #ffd1de;
+    }
+
+    tbody td {
+      padding: 14px 15px;
+      font-weight: 500;
+      color: #5a2d3f;
+      font-size: 1rem;
+      border-bottom: none;
+      user-select: text;
+    }
+
+    /* Result section */
+    #result {
+      background: #fff0f5;
+      padding: 30px 25px 40px 25px;
+      border-radius: 20px;
+      box-shadow: 0 12px 40px rgba(255, 92, 138, 0.2);
+      max-width: 400px;
+      margin: 0 auto 50px auto;
+      user-select: none;
+    }
+
+    canvas {
+      display: block;
+      margin: 0 auto 20px auto;
+      max-width: 100%;
+      border-radius: 14px;
+      box-shadow: 0 5px 15px rgba(255, 92, 138, 0.25);
+    }
+
+    .funny-result {
+      font-size: 1.3rem;
+      color: #ff5c8a;
+      font-weight: 600;
+      margin-bottom: 25px;
+      min-height: 1.5em;
+      text-shadow: 0 0 5px #ff8da3;
+    }
+
+    /* Download button inside result */
+    #result button {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      border-radius: 14px;
+      background: #ff9a76;
+      box-shadow: 0 6px 15px rgba(255, 154, 118, 0.5);
+      transition: background-color 0.3s ease, transform 0.15s ease;
+      border: none;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+    }
+    #result button:hover {
+      background: #ff6a3e;
+      transform: scale(1.05);
+    }
+    #result button:active {
+      transform: scale(0.97);
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      main {
+        padding: 20px 15px;
+      }
+      .input-group {
+        flex-direction: column;
+      }
+      input[type="text"],
+      input[type="number"],
+      button {
+        width: 100%;
+        flex: none;
+      }
+      table {
+        font-size: 0.9rem;
+      }
+      thead th {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 class="typing-header">"How Broke Are You?” Spending Visualizer</h1>
+    <a href="main.html" aria-label="Logout">
+      <img src="logout.png" alt="Logout Icon" />
+    </a>
+  </header>
+
+  <main>
+    <div class="input-group">
+        <input type="number" id="monthlyIncome" placeholder="Enter Monthly Income ($)" min="0" />
+    </div>
+    <div class="input-group">
+      <input type="text" id="itemName" placeholder="Item (e.g. Coffee)" />
+      <input type="number" id="itemPrice" placeholder="Price (e.g. 4.5)" step="0.01" min="0" />
+      <button onclick="addItem()">Add Item</button>
+    </div>
+
+    <table id="itemsTable" aria-label="List of items and prices">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Price ($)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Items go here -->
+      </tbody>
+    </table>
+
+    <div id="result" aria-live="polite" aria-atomic="true" aria-relevant="additions removals">
+      <!-- Chart, message, and download button appear here -->
+    </div>
+  </main>
+
+  <script>
+    const items = [];
+
+    function addItem() {
+  const nameInput = document.getElementById('itemName');
+  const priceInput = document.getElementById('itemPrice');
+  const name = nameInput.value.trim();
+  const price = parseFloat(priceInput.value);
+
+  if (!name) {
+    alert('Please enter a valid item name.');
+    nameInput.focus();
+    return;
+  }
+  if (isNaN(price) || price < 0) {
+    alert('Please enter a valid non-negative price.');
+    priceInput.focus();
+    return;
+  }
+
+  // Find if item already exists (case insensitive)
+  const existingItem = items.find(item => item.name.toLowerCase() === name.toLowerCase());
+
+  if (existingItem) {
+    // Add price to existing item
+    existingItem.price += price;
+  } else {
+    // Add new item
+    items.push({ name, price });
+  }
+
+  nameInput.value = '';
+  priceInput.value = '';
+  nameInput.focus();
+
+  renderItemsTable();
+  renderResults();
+}
+
+
+    function renderItemsTable() {
+      const tbody = document.querySelector('#itemsTable tbody');
+      tbody.innerHTML = '';
+      items.forEach(({ name, price }) => {
+        const row = document.createElement('tr');
+        const nameCell = document.createElement('td');
+        nameCell.textContent = name;
+        const priceCell = document.createElement('td');
+        priceCell.textContent = price.toFixed(2);
+        row.appendChild(nameCell);
+        row.appendChild(priceCell);
+        tbody.appendChild(row);
+      });
+    }
+
+    function renderResults() {
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '';
+
+      if (items.length === 0) {
+        resultDiv.textContent = 'Add items to visualize your spending.';
+        return;
+      }
+
+      const total = items.reduce((acc, item) => acc + item.price, 0);
+      const monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value);
+      // Create canvas for chart
+      const canvas = document.createElement('canvas');
+      canvas.id = 'spendingChart';
+      resultDiv.appendChild(canvas);
+
+      // Create message container
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'funny-result';
+      resultDiv.appendChild(msgDiv);
+
+      // Chart data
+      const labels = items.map(item => item.name);
+      const data = items.map(item => item.price);
+
+      const ctx = canvas.getContext('2d');
+
+      // Destroy old chart instance if exists
+      if (window.myChart) {
+        window.myChart.destroy();
+      }
+
+      window.myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Spending Distribution',
+            data: data,
+            backgroundColor: generateColors(data.length),
+            borderColor: '#fff',
+            borderWidth: 2,
+            hoverOffset: 20
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { font: { size: 14 }, color: '#5a2d3f' }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const val = context.parsed || 0;
+                  return `${label}: $${val.toFixed(2)}`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Funny message based on total spending
+      let funnyMsg = '';
+      if (!monthlyIncome || monthlyIncome <= 0) {
+    funnyMsg = "Please enter your monthly income to see spending insights.";
+  } else {
+    const percent = (total / monthlyIncome) * 100;
+    if (percent < 25) {
+      funnyMsg = "Keeping it light on the wallet, nice!";
+    } else if (percent < 50) {
+      funnyMsg = "Splurging a bit, aren't we?";
+    } else if (percent < 75) {
+      funnyMsg = "Yikes, that's a serious spree!";
+    } else {
+      funnyMsg = "Whoa, someone's living large!";
+    }
+  }
+      msgDiv.textContent = funnyMsg;
+      if (!isNaN(monthlyIncome) && monthlyIncome > 0) {
+  const balance = monthlyIncome - total;
+  const balanceDiv = document.createElement('div');
+  balanceDiv.style.margin = '15px';
+  balanceDiv.style.fontSize = '1.2rem';
+  balanceDiv.style.fontWeight = '600';
+  balanceDiv.style.color = balance >= 0 ? '#ff5c8a' : '#dc3545';
+  balanceDiv.textContent = `Balance Left: $${balance.toFixed(2)}`;
+  resultDiv.appendChild(balanceDiv);
+}
+
+      // Download button for screenshot
+      const btnDownload = document.createElement('button');
+      btnDownload.textContent = 'Download Budget Visualizer';
+      btnDownload.addEventListener('click', () => {
+        html2canvas(resultDiv).then(canvas => {
+          canvas.toBlob(blob => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'budget_visualizer.png';
+            a.click();
+            URL.revokeObjectURL(url);
+          });
+        });
+      });
+      resultDiv.appendChild(btnDownload);
+    }
+
+    function generateColors(n) {
+      const baseColors = [
+        '#ff6384',
+        '#36a2eb',
+        '#ffce56',
+        '#4bc0c0',
+        '#9966ff',
+        '#ff9f40',
+        '#c9cbcf',
+        '#ff5c8a',
+        '#ffa07a',
+        '#9acd32'
+      ];
+      const colors = [];
+      for (let i = 0; i < n; i++) {
+        colors.push(baseColors[i % baseColors.length]);
+      }
+      return colors;
+    }
+  </script>
+</body>
+</html>
