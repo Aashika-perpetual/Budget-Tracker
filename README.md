@@ -20,7 +20,7 @@ An interactive and visually engaging web app that helps users track their monthl
 
 - **Frontend**: HTML5, CSS3, JavaScript (Vanilla JS)
 - **Charts**: Chart.js 
-- **Hosting**: [Netlify]([https://netlify.com](http://budgettracker-aashi.netlify.app))
+- **Hosting**: [Netlify](http://budgettracker-aashi.netlify.app)
 
 ---
 
